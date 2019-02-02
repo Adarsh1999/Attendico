@@ -29,8 +29,7 @@ import Refresh from "@material-ui/icons/Refresh";
 import TextField from "@material-ui/core/TextField";
 
 import { createPerson } from "./api/Person";
-import { addPersonFace } from './api/Person';
-
+import { addPersonFace } from "./api/Person";
 
 const theme = createMuiTheme({
   palette: {
@@ -38,16 +37,19 @@ const theme = createMuiTheme({
   }
 });
 
+
+
 class SignIn extends React.Component {
   state = {
     screenshot: null,
     picButtonDisable: false,
     name: "",
     rollno: "",
-    personGroupId:"employees",
-    lastCreatedPersonId:""
+    personGroupId: "employees",
+    lastCreatedPersonId: "ac7ccaa8-2e26-4a6a-9d22-fee4f0b15335"
   };
 
+  
   handleClick = () => {
     const screenshot = this.webcam.getScreenshot();
     this.setState({ screenshot, picButtonDisable: true });
@@ -63,43 +65,39 @@ class SignIn extends React.Component {
     });
   };
 
-
-  setLastCreatedPersonId = (data)=>{
+  setLastCreatedPersonId = data => {
     this.setState({
       lastCreatedPersonId: data
-    })
-    console.log(this.state.lastCreatedPersonId)
-
-  }
+    });
+    console.log(this.state.lastCreatedPersonId);
+  };
 
   handleSubmit = event => {
     event.preventDefault();
     console.log(this.state);
-    const params = {
-      personGroupId: this.state.personGroupId,
-      name: this.state.name,
+
+    const image = this.state.screenshot;
+    
+    fetch(image)
+      .then(res => res.blob())
+      .then(blobData => {
+        console.log(blobData)
+        fetch(
+          "https://centralindia.api.cognitive.microsoft.com/face/v1.0/persongroups/employees/persons/ac7ccaa8-2e26-4a6a-9d22-fee4f0b15335/persistedFaces",
+          {
+            method: "post",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "Ocp-Apim-Subscription-Key": process.env.REACT_APP_FACE_API_KEY
+            },
+            processData: false,
+            body: blobData
+          }
+        ).then(response => {
+          console.log(response.json());
+        });
+      });
   };
-
-  createPerson(params)
-      .then(response => response.json())
-      .then(body => this.setLastCreatedPersonId(body.personId))
-      .catch(console.error);
-
-
-      const params1 = {
-       
-        personGroupId: this.state.personGroupId,
-        personId: this.state.lastCreatedPersonId,
-        url:this.screenshot
-    };
-
-    addPersonFace(params)
-        .then((response) => response.json())
-        .then((body) => console.log(body.persistedFaceId))
-        .catch(console.error);
-  };
-
-  
 
   render() {
     {
@@ -116,7 +114,12 @@ class SignIn extends React.Component {
                   {this.state.screenshot ? (
                     <img alt="ops" src={this.state.screenshot} />
                   ) : (
-                    <Webcam ref={node => (this.webcam = node)} />
+                    <Webcam
+                      ref={node => (this.webcam = node)}
+                      screenshotFormat="image/jpeg"
+                      height={350}
+                      width={350}
+                    />
                   )}
                 </Avatar>
 

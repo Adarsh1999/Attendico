@@ -3,7 +3,7 @@
 # dependencies
 attendico-register/node_modules
 
-.env
+attendico-register/.env
 .env.development.local
 .env.test.local
 .env.production.local
