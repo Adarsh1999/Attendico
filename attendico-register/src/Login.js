@@ -29,15 +29,12 @@ import Refresh from "@material-ui/icons/Refresh";
 import TextField from "@material-ui/core/TextField";
 
 import { createPerson } from "./api/Person";
-import { addPersonFace } from "./api/Person";
 
 const theme = createMuiTheme({
   palette: {
     primary: { light: blue[300], main: blue[500], dark: blue[700] }
   }
 });
-
-
 
 class SignIn extends React.Component {
   state = {
@@ -46,10 +43,9 @@ class SignIn extends React.Component {
     name: "",
     rollno: "",
     personGroupId: "employees",
-    lastCreatedPersonId: "ac7ccaa8-2e26-4a6a-9d22-fee4f0b15335"
+    personId: ""
   };
 
-  
   handleClick = () => {
     const screenshot = this.webcam.getScreenshot();
     this.setState({ screenshot, picButtonDisable: true });
@@ -65,11 +61,11 @@ class SignIn extends React.Component {
     });
   };
 
-  setLastCreatedPersonId = data => {
+  setPersonId = data => {
     this.setState({
-      lastCreatedPersonId: data
+      personId: data
     });
-    console.log(this.state.lastCreatedPersonId);
+    console.log(this.state.personId);
   };
 
   handleSubmit = event => {
@@ -77,26 +73,52 @@ class SignIn extends React.Component {
     console.log(this.state);
 
     const image = this.state.screenshot;
-    
-    fetch(image)
-      .then(res => res.blob())
-      .then(blobData => {
-        console.log(blobData)
-        fetch(
-          "https://centralindia.api.cognitive.microsoft.com/face/v1.0/persongroups/employees/persons/ac7ccaa8-2e26-4a6a-9d22-fee4f0b15335/persistedFaces",
+
+    const params = {
+      personGroupId: this.state.personGroupId,
+      name: this.state.name,
+      userData: this.state.rollno
+    };
+
+    const personCreated = createPerson(params)
+      .then(response => response.json())
+      .then(body => {
+        this.setState(
           {
-            method: "post",
-            headers: {
-              "Content-Type": "application/octet-stream",
-              "Ocp-Apim-Subscription-Key": process.env.REACT_APP_FACE_API_KEY
-            },
-            processData: false,
-            body: blobData
+            personId: body.personId
+          },
+
+          () => {
+            personCreated.then(
+              fetch(image)
+                .then(res => res.blob())
+                .then(blobData => {
+                  console.log(blobData);
+                  fetch(
+                    `https://centralindia.api.cognitive.microsoft.com/face/v1.0/persongroups/${
+                      this.state.personGroupId
+                    }/persons/${this.state.personId}/persistedFaces`,
+                    {
+                      method: "post",
+                      headers: {
+                        "Content-Type": "application/octet-stream",
+                        "Ocp-Apim-Subscription-Key":
+                          process.env.REACT_APP_FACE_API_KEY
+                      },
+                      processData: false,
+                      body: blobData
+                    }
+                  ).then(response => {
+                    console.log(response.json());
+                  });
+                })
+            );
           }
-        ).then(response => {
-          console.log(response.json());
-        });
-      });
+        );
+      })
+
+      .catch(console.error);
+
   };
 
   render() {
