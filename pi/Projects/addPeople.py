@@ -6,7 +6,7 @@ import os
 people = ['alexandra']
 nameAndID = [] # empty list for persons' name and personId
 group_id = 'employees'
-KEY = '********************'  # Your api Goes here 
+KEY = '********************'  # Your api Key Goes here 
 
 # creates people in personGroup of specified group_Id
 def addPeople():
