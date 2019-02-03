@@ -43,8 +43,8 @@ const theme = createMuiTheme({
     primary: { light: blue[300], main: blue[500], dark: blue[700] }
   }
 });
-
-class SignIn extends React.Component {
+ 
+class Register extends React.Component {
   state = {
     screenshot: null,
     picButtonDisable: false,
@@ -111,7 +111,7 @@ class SignIn extends React.Component {
                       headers: {
                         "Content-Type": "application/octet-stream",
                         "Ocp-Apim-Subscription-Key":
-                          process.env.REACT_APP_FACE_API_KEY
+                        process.env.REACT_APP_FACE_API_KEY
                       },
                       processData: false,
                       body: blobData
@@ -294,8 +294,8 @@ class SignIn extends React.Component {
   }
 }
 
-SignIn.propTypes = {
+Register.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(LoginStyles)(SignIn);
+export default withStyles(LoginStyles)(Register);

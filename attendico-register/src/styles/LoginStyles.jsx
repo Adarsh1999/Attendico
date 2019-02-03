@@ -1,9 +1,14 @@
 const LoginStyles = theme => ({
+ appbar: {
+    alignItems: 'center',
+    flexGrow: 1
+  },
   layout: {
     width: "auto",
     display: "flex", // Fix IE 11 issue.
     marginLeft: theme.spacing.unit * 3,
     marginRight: theme.spacing.unit * 3,
+    marginBottom: theme.spacing.unit * 1,
     [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
       width: 400,
       marginLeft: "auto",
@@ -36,6 +41,9 @@ const LoginStyles = theme => ({
   },
   fab: {
     marginTop: theme.spacing.unit * 3
+  },
+  margin: {
+    margin: theme.spacing.unit,
   }
 });
 
