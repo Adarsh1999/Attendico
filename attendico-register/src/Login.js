@@ -3,12 +3,7 @@ import PropTypes from "prop-types";
 
 import { Avatar, Button } from "@material-ui/core";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import LockIcon from "@material-ui/icons/LockOutlined";
+
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import {
@@ -30,7 +25,20 @@ import TextField from "@material-ui/core/TextField";
 
 import { createPerson } from "./api/Person";
 
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+
+import Snackbar from "@material-ui/core/Snackbar";
+
+import SnackbarContentWrapper from "./components/SnackBarContent";
+
+import { trainPersonGroupId } from "./api/Train";
+
 const theme = createMuiTheme({
+  typography: {
+    useNextVariants: true,
+    fontFamily: '"cursive"',
+  },
   palette: {
     primary: { light: blue[300], main: blue[500], dark: blue[700] }
   }
@@ -42,8 +50,12 @@ class SignIn extends React.Component {
     picButtonDisable: false,
     name: "",
     rollno: "",
+    phoneNo:"",
     personGroupId: "employees",
-    personId: ""
+    personId: "",
+    snackbar: false,
+    snackVariant: "error",
+    snackMsg: "Opsii, Face Not Detected"
   };
 
   handleClick = () => {
@@ -61,13 +73,6 @@ class SignIn extends React.Component {
     });
   };
 
-  setPersonId = data => {
-    this.setState({
-      personId: data
-    });
-    console.log(this.state.personId);
-  };
-
   handleSubmit = event => {
     event.preventDefault();
     console.log(this.state);
@@ -77,7 +82,10 @@ class SignIn extends React.Component {
     const params = {
       personGroupId: this.state.personGroupId,
       name: this.state.name,
-      userData: this.state.rollno
+      userData: JSON.stringify({
+        rollNo : this.state.rollno,
+        phoneNo : this.state.phoneNo
+      })
     };
 
     const personCreated = createPerson(params)
@@ -108,9 +116,29 @@ class SignIn extends React.Component {
                       processData: false,
                       body: blobData
                     }
-                  ).then(response => {
-                    console.log(response.json());
-                  });
+                  )
+                    .then(response => response.json())
+                    .then(body => {
+                      if (body.persistedFaceId) {
+                        this.setState({
+                          snackbar: true,
+                          snackMsg: "Yeppi, Face Add Success",
+                          snackVariant: "success"
+                        });
+                        const paramsT = {
+                          personGroupId: this.state.personGroupId
+                        };
+                        trainPersonGroupId(paramsT);
+                      } else {
+                        this.setState({
+                          snackbar: true
+                        });
+                      }
+                    })
+
+                    .catch(error => {
+                      console.log(error);
+                    });
                 })
             );
           }
@@ -118,16 +146,46 @@ class SignIn extends React.Component {
       })
 
       .catch(console.error);
+  };
 
+  handleSnackbarClick = () => {
+    this.setState({ snackbar: true });
+  };
+
+  handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    this.setState({ snackbar: false });
   };
 
   render() {
     {
       const { classes } = this.props;
+
+      const videoConstraints = {
+        facingMode: "user"
+      };
+
+      
       return (
         <React.Fragment>
           <CssBaseline />
           <MuiThemeProvider theme={theme}>
+            <div className={classes.appbar}>
+              <AppBar
+                position="sticky"
+                color="primary"
+                className={classes.appbar}
+              >
+                <Toolbar>
+                  <Typography variant="h6" color="inherit">
+                    Attendico
+                  </Typography>
+                </Toolbar>
+              </AppBar>
+            </div>
             <main className={classes.layout}>
               <div>
                 <Avatar className={classes.avatar}>
@@ -141,6 +199,7 @@ class SignIn extends React.Component {
                       screenshotFormat="image/jpeg"
                       height={350}
                       width={350}
+                      videoConstraints={videoConstraints}
                     />
                   )}
                 </Avatar>
@@ -165,6 +224,15 @@ class SignIn extends React.Component {
                       className={classes.textField}
                       value={this.state.rollno}
                       onChange={this.handleChange("rollno")}
+                      margin="normal"
+                      fullWidth
+                    />
+                    <TextField
+                      id="phoneNo"
+                      label="PhoneNo"
+                      className={classes.textField}
+                      value={this.state.phoneNo}
+                      onChange={this.handleChange("phoneNo")}
                       margin="normal"
                       fullWidth
                     />
@@ -200,6 +268,23 @@ class SignIn extends React.Component {
                     </Button>
                   </form>
                 </Paper>
+              </div>
+              <div>
+                <Snackbar
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                  }}
+                  open={this.state.snackbar}
+                  autoHideDuration={3000}
+                  onClose={this.handleSnackbarClose}
+                >
+                  <SnackbarContentWrapper
+                    onClose={this.handleSnackbarClose}
+                    variant={this.state.snackVariant}
+                    message={this.state.snackMsg}
+                  />
+                </Snackbar>
               </div>
             </main>
           </MuiThemeProvider>
