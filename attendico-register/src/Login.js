@@ -57,7 +57,7 @@ class Register extends React.Component {
     name: "",
     rollno: "",
     phoneNo: "",
-    personGroupId: "employees",
+    personGroupId: "students",
     personId: "",
     snackbar: false,
     snackVariant: "error",
