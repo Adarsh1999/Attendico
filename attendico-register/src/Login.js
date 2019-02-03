@@ -13,6 +13,7 @@ import {
 } from "@material-ui/core/styles";
 
 import blue from "@material-ui/core/colors/blue";
+import red from "@material-ui/core/colors/red";
 
 import LoginStyles from "./styles/LoginStyles";
 
@@ -34,28 +35,34 @@ import SnackbarContentWrapper from "./components/SnackBarContent";
 
 import { trainPersonGroupId } from "./api/Train";
 
+import StyledButton from "./components/StyledButton";
+
 const theme = createMuiTheme({
   typography: {
     useNextVariants: true,
-    fontFamily: '"cursive"',
+    fontFamily:"cursive"
   },
   palette: {
-    primary: { light: blue[300], main: blue[500], dark: blue[700] }
+    primary: { light: blue[300], main: blue[500], dark: blue[700], textSecondary: { main: red[50] } },
+    background: {
+      default: "#000"
+    }
   }
 });
- 
+
 class Register extends React.Component {
   state = {
     screenshot: null,
     picButtonDisable: false,
     name: "",
     rollno: "",
-    phoneNo:"",
+    phoneNo: "",
     personGroupId: "employees",
     personId: "",
     snackbar: false,
     snackVariant: "error",
-    snackMsg: "Opsii, Face Not Detected"
+    snackMsg: "Opsii, Face Not Detected",
+    lodingState: false
   };
 
   handleClick = () => {
@@ -77,16 +84,22 @@ class Register extends React.Component {
     event.preventDefault();
     console.log(this.state);
 
+
+
     const image = this.state.screenshot;
 
     const params = {
       personGroupId: this.state.personGroupId,
       name: this.state.name,
       userData: JSON.stringify({
-        rollNo : this.state.rollno,
-        phoneNo : this.state.phoneNo
+        rollNo: this.state.rollno,
+        phoneNo: this.state.phoneNo
       })
     };
+
+    this.setState({
+      lodingState:true
+    })
 
     const personCreated = createPerson(params)
       .then(response => response.json())
@@ -111,7 +124,7 @@ class Register extends React.Component {
                       headers: {
                         "Content-Type": "application/octet-stream",
                         "Ocp-Apim-Subscription-Key":
-                        process.env.REACT_APP_FACE_API_KEY
+                          process.env.REACT_APP_FACE_API_KEY
                       },
                       processData: false,
                       body: blobData
@@ -121,6 +134,7 @@ class Register extends React.Component {
                     .then(body => {
                       if (body.persistedFaceId) {
                         this.setState({
+                          lodingState:false,
                           snackbar: true,
                           snackMsg: "Yeppi, Face Add Success",
                           snackVariant: "success"
@@ -131,6 +145,8 @@ class Register extends React.Component {
                         trainPersonGroupId(paramsT);
                       } else {
                         this.setState({
+                          lodingState:false,
+
                           snackbar: true
                         });
                       }
@@ -168,7 +184,6 @@ class Register extends React.Component {
         facingMode: "user"
       };
 
-      
       return (
         <React.Fragment>
           <CssBaseline />
@@ -177,11 +192,12 @@ class Register extends React.Component {
               <AppBar
                 position="sticky"
                 color="primary"
+                style={{ background: "transparent" }}
                 className={classes.appbar}
               >
                 <Toolbar>
-                  <Typography variant="h6" color="inherit">
-                    Attendico
+                  <Typography variant="h3" color="inherit">
+                    <strong>Attendico</strong>
                   </Typography>
                 </Toolbar>
               </AppBar>
@@ -205,7 +221,7 @@ class Register extends React.Component {
                 </Avatar>
 
                 <Paper className={classes.paper} elevation={8}>
-                  <Typography component="h1" variant="h5">
+                  <Typography component="h1" variant="h6" color= "textSecondary">
                     Register
                   </Typography>
                   <form className={classes.form} onSubmit={this.handleSubmit}>
@@ -221,7 +237,12 @@ class Register extends React.Component {
                     <TextField
                       id="rollno"
                       label="Rollno"
-                      className={classes.textField}
+                      multiline
+                      InputProps={{
+                        classes: {
+                          input: classes.textField
+                        }
+                      }}
                       value={this.state.rollno}
                       onChange={this.handleChange("rollno")}
                       margin="normal"
@@ -237,7 +258,7 @@ class Register extends React.Component {
                       fullWidth
                     />
 
-                    <Button
+                    <StyledButton
                       onClick={this.handleClick}
                       variant="contained"
                       color="primary"
@@ -245,10 +266,10 @@ class Register extends React.Component {
                       disabled={this.state.picButtonDisable}
                     >
                       Take pic
-                    </Button>
+                    </StyledButton>
 
                     <Fab
-                      color="primary"
+                      color="linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)"
                       aria-label="Add"
                       className={classes.fab}
                       size="small"
@@ -256,16 +277,27 @@ class Register extends React.Component {
                     >
                       <Refresh />
                     </Fab>
-
-                    <Button
+                    <StyledButton
                       type="submit"
                       fullWidth
                       variant="contained"
                       color="primary"
                       className={classes.submit}
+                      loading={this.state.lodingState}
+
                     >
                       Submit
-                    </Button>
+                    </StyledButton>
+                    {/* <Button
+                      type="submit"
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      className={classes.submit}
+                    > */}
+
+                    {/* Submit
+                    </Button> */}
                   </form>
                 </Paper>
               </div>

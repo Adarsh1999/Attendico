@@ -1,7 +1,7 @@
 const LoginStyles = theme => ({
  appbar: {
     alignItems: 'center',
-    flexGrow: 1
+    flexGrow: 1,
   },
   layout: {
     width: "auto",
@@ -14,12 +14,14 @@ const LoginStyles = theme => ({
       marginLeft: "auto",
       marginRight: "auto"
     }
+    // hi 
   },
   paper: {
     marginTop: theme.spacing.unit * 4,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    backgroundColor: theme.palette.primary.light,
     padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 3}px ${theme
       .spacing.unit * 3}px`
   },
